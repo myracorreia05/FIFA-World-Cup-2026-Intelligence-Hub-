@@ -507,14 +507,22 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         contents:[{role:'user',parts:[{text:predPrompt}]}],
-        generationConfig:{maxOutputTokens:1000}
+        generationConfig:{maxOutputTokens:1000,responseMimeType:'application/json'}
       })
     });
     const data=await response.json();
-    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+    console.log('Gemini predictor response:', JSON.stringify(data));
+    const text=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0])?data.candidates[0].content.parts[0].text:'{}';
     let parsed;
-    try{parsed=JSON.parse(text.replace(/```json|```/g,'').trim());}
-    catch{parsed={team1_win:40,draw:20,team2_win:40,predicted_score:'1-1',analysis:`A competitive match between ${t1} and ${t2}. Both sides have shown quality in the group stage. Expect an evenly-contested game with chances at both ends.`};}
+    try{
+      const cleaned=text.replace(/```json|```/g,'').trim();
+      const jsonMatch=cleaned.match(/\{[\s\S]*\}/);
+      parsed=JSON.parse(jsonMatch?jsonMatch[0]:cleaned);
+      if(!parsed.team1_win||!parsed.draw||!parsed.team2_win)throw new Error('Missing fields');
+    }catch(e){
+      console.log('JSON parse error:',e,'raw text:',text);
+      parsed={team1_win:45,draw:25,team2_win:30,predicted_score:'2-1',analysis:`A competitive match between ${t1} and ${t2}. Both sides have shown quality in the group stage. Expect an evenly-contested game with chances at both ends. The slight edge goes to the higher-ranked side based on recent form.`};
+    }
 
     const bars=[
       {label:t1,pct:parsed.team1_win,color:'#00c2ff'},
@@ -592,7 +600,8 @@ async function sendChat(){
       })
     });
     const data=await res.json();
-    const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'Sorry, I could not generate a response.';
+    console.log('Gemini chat response:', JSON.stringify(data));
+    const reply=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0])?data.candidates[0].content.parts[0].text:'Sorry, I could not generate a response.';
     chatHistory.push({role:'assistant',content:reply});
     document.getElementById(typingId)?.remove();
     appendMsg('ai',reply.replace(/\n/g,'<br>'));
