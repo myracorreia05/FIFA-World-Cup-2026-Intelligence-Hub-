@@ -17,8 +17,7 @@
 | 📊 **Live Hub** | 5 Chart.js visualizations — goals trend, top scorers, host nations radar, confederation breakdown, team goals comparison |
 | 🏆 **Group Standings** | All 12 groups, auto-sorted by points → goal diff → goals scored, with advancement highlighting |
 | 👤 **Player Intel** | Key performers with goals, assists, ratings, and animated form bars |
-| 🔮 **AI Predictor** | Pick any 2 of 48 nations → Claude AI returns win probabilities + tactical analysis |
-| 💬 **AI Analyst** | Full conversational AI analyst loaded with live WC 2026 context — ask anything |
+
 
 ---
 
