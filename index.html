@@ -233,7 +233,7 @@ tr.adv{background:rgba(245,197,24,.04)}
       <div class="sec-title" style="margin-bottom:.25rem">🤖 AI Predictions vs Reality</div>
       <p style="font-size:.75rem;color:var(--muted)">Pre-match AI win probabilities vs actual results · updates after every match</p>
     </div>
-    <button class="refresh-btn" onclick="loadPredictions()">↻ Refresh</button>
+    <div style="text-align:right"><button class="refresh-btn" onclick="loadPredictions()">↻ Refresh</button><div style="font-size:.62rem;color:var(--muted);margin-top:.3rem" id="predLastUpdated"></div></div>
   </div>
   <div class="acc-wrap">
     <div class="acc-num"><span id="accCorrect">–</span><span>Correct</span></div>
@@ -286,7 +286,8 @@ function showPage(id, btn) {
   if (id === "players") setTimeout(function(){ document.querySelectorAll(".bar-fill").forEach(function(b){ b.style.width = b.dataset.w; }); }, 100);
   if (id === "livescores") startLiveRefresh();
   else { if (liveInterval) { clearInterval(liveInterval); liveInterval = null; } }
-  if (id === "predictions") loadPredictions();
+  if (id === "predictions") startPredRefresh();
+  else stopPredRefresh();
 }
 
 /* ── CHARTS ── */
@@ -432,7 +433,19 @@ var PREDS = {
   "38":{h:20,d:25,a:55,pick:"away"},"39":{h:65,d:20,a:15,pick:"home"},"40":{h:40,d:30,a:30,pick:"home"},
   "41":{h:65,d:20,a:15,pick:"home"},"42":{h:25,d:25,a:50,pick:"away"},"43":{h:60,d:20,a:20,pick:"home"},
   "44":{h:30,d:30,a:40,pick:"away"},"45":{h:65,d:20,a:15,pick:"home"},"46":{h:35,d:30,a:35,pick:"draw"},
-  "47":{h:45,d:30,a:25,pick:"home"},"48":{h:55,d:25,a:20,pick:"home"}
+  "47":{h:45,d:30,a:25,pick:"home"},"48":{h:55,d:25,a:20,pick:"home"},
+  "49":{h:40,d:30,a:30,pick:"draw"},"50":{h:60,d:25,a:15,pick:"home"},
+  "51":{h:35,d:30,a:35,pick:"draw"},"52":{h:55,d:25,a:20,pick:"away"},
+  "53":{h:30,d:30,a:40,pick:"away"},"54":{h:55,d:25,a:20,pick:"home"},
+  "55":{h:35,d:30,a:35,pick:"draw"},"56":{h:20,d:25,a:55,pick:"away"},
+  "57":{h:40,d:30,a:30,pick:"draw"},"58":{h:25,d:25,a:50,pick:"away"},
+  "59":{h:40,d:30,a:30,pick:"draw"},"60":{h:25,d:25,a:50,pick:"away"},
+  "61":{h:35,d:30,a:35,pick:"draw"},"62":{h:40,d:25,a:35,pick:"draw"},
+  "63":{h:35,d:30,a:35,pick:"draw"},"64":{h:20,d:25,a:55,pick:"away"},
+  "65":{h:30,d:30,a:40,pick:"away"},"66":{h:35,d:25,a:40,pick:"away"},
+  "67":{h:20,d:25,a:55,pick:"away"},"68":{h:45,d:30,a:25,pick:"home"},
+  "69":{h:40,d:30,a:30,pick:"home"},"70":{h:20,d:25,a:55,pick:"away"},
+  "71":{h:25,d:25,a:50,pick:"away"},"72":{h:35,d:30,a:35,pick:"draw"}
 };
 
 function getOutcome(hs,as){
@@ -465,8 +478,21 @@ function parseScorers(raw){
 }
 
 function renderPredictions(matches){
-  var finished=matches.filter(function(m){return (m.finished==="TRUE"||m.finished===true)&&m.type==="group";});
-  finished.sort(function(a,b){return (parseInt(a.id)||0)-(parseInt(b.id)||0);});
+  var grpMatches=matches.filter(function(m){return m.type==="group"&&m.home_team_id!=="0"&&m.away_team_id!=="0";});
+  grpMatches.sort(function(a,b){return (parseInt(a.id)||0)-(parseInt(b.id)||0);});
+
+  // Separate into live, upcoming (today), finished
+  var live=[],upcoming=[],finished=[];
+  grpMatches.forEach(function(m){
+    var te=(m.time_elapsed||"").toLowerCase();
+    var isLive=te==="1h"||te==="2h"||te==="ht"||te==="live"||(!isNaN(parseInt(te))&&parseInt(te)>0);
+    var isFt=te==="finished"||m.finished==="TRUE"||m.finished===true;
+    if(isLive) live.push(m);
+    else if(isFt) finished.push(m);
+    else upcoming.push(m);
+  });
+
+  // Accuracy from finished only
   var correct=0,total=0;
   finished.forEach(function(m){
     var pred=PREDS[String(m.id)];
@@ -479,16 +505,44 @@ function renderPredictions(matches){
   var pct=total?Math.round(correct/total*100):0;
   document.getElementById("accPct").textContent=pct+"%";
   setTimeout(function(){document.getElementById("accFill").style.width=pct+"%";},200);
-  var byDay={};
-  finished.forEach(function(m){
-    var d=m.matchday||"1";
-    if(!byDay[d])byDay[d]=[];
-    byDay[d].push(m);
-  });
+
   var html="";
-  Object.keys(byDay).sort(function(a,b){return parseInt(a)-parseInt(b);}).forEach(function(day){
-    html+="<div class='match-day-label'>⚽ Matchday "+day+"</div>";
-    byDay[day].forEach(function(m){
+
+  // LIVE matches — show with pulsing indicator
+  if(live.length){
+    html+="<div class='match-day-label' style='color:var(--red)'><span class='live-pulse'></span>LIVE NOW — AI Prediction Active</div>";
+    live.forEach(function(m){
+      var hn=m.home_team_name_en||m.home_team_label||"TBD";
+      var an=m.away_team_name_en||m.away_team_label||"TBD";
+      html+=buildLivePredCard(m.id,hn,an,m.home_score,m.away_score,m.group,m.matchday,m.time_elapsed,true);
+    });
+  }
+
+  // UPCOMING — today only (next 4)
+  var todayUpcoming=upcoming.filter(function(m){
+    if(!m.local_date)return false;
+    var d=m.local_date.split(" ")[0];
+    var today=new Date();
+    var mm=String(today.getMonth()+1).padStart(2,"0");
+    var dd=String(today.getDate()).padStart(2,"0");
+    var yy=today.getFullYear();
+    return d===mm+"/"+dd+"/"+yy;
+  }).slice(0,4);
+  if(todayUpcoming.length){
+    html+="<div class='match-day-label' style='color:var(--blue)'>📅 Today — AI Pre-Match Prediction</div>";
+    todayUpcoming.forEach(function(m){
+      var hn=m.home_team_name_en||m.home_team_label||"TBD";
+      var an=m.away_team_name_en||m.away_team_label||"TBD";
+      html+=buildLivePredCard(m.id,hn,an,null,null,m.group,m.matchday,m.local_date?m.local_date.split(" ")[1]:"",false);
+    });
+  }
+
+  // FINISHED — grouped by matchday
+  var byDay={};
+  finished.forEach(function(m){var d=m.matchday||"1";if(!byDay[d])byDay[d]=[];byDay[d].push(m);});
+  Object.keys(byDay).sort(function(a,b){return parseInt(b)-parseInt(a);}).forEach(function(day){
+    html+="<div class='match-day-label'>✅ Matchday "+day+" Results</div>";
+    byDay[day].reverse().forEach(function(m){
       var hs=m.home_team_name_en||m.home_team_label||"TBD";
       var as=m.away_team_name_en||m.away_team_label||"TBD";
       var hsc=parseScorers(m.home_scorers);
@@ -501,11 +555,24 @@ function renderPredictions(matches){
       html+=buildPredCard(m.id,hs,as,m.home_score,m.away_score,m.group,m.matchday,scorerStr);
     });
   });
-  document.getElementById("predictionsContainer").innerHTML=html||"<div class='no-live'><span>📅</span>No finished matches yet</div>";
+
+  document.getElementById("predictionsContainer").innerHTML=html||"<div class='no-live'><span>📅</span>No matches yet</div>";
+  document.getElementById("predLastUpdated").textContent="Updated: "+new Date().toLocaleTimeString();
 }
 
+function buildLivePredCard(id,hn,an,hs,as,grp,md,timeInfo,isLive){
+  var pred=PREDS[String(id)]||{h:35,d:30,a:35,pick:"draw"};
+  var hf=flag(hn),af=flag(an);
+  var scoreHtml=isLive?
+    "<div class='pm-score' style='color:var(--red)'>"+(hs||"0")+" – "+(as||"0")+" <span style='font-size:.65rem;color:var(--red)'>"+timeInfo+"</span></div>":
+    "<div style='font-size:.75rem;color:var(--blue);margin-top:.3rem'>KO: "+timeInfo+"</div>";
+  var pickLabel=pred.pick==="home"?hn.split(" ")[0]:pred.pick==="away"?an.split(" ")[0]:"Draw";
+  var borderStyle=isLive?"border-left:3px solid var(--red)":"border-left:3px solid var(--blue)";
+  return "<div class='pm' style='"+borderStyle+"'><div class='pm-left'><div class='pm-group'>Group "+grp+" · MD"+md+(isLive?" <span class='live-pulse'></span>":"")+"</div><div class='pm-teams'>"+hf+" "+hn+" <span style='color:var(--muted)'>vs</span> "+an+" "+af+"</div>"+scoreHtml+"</div><div class='pm-right'><div class='ai-tag'>🤖 AI Pre-Match Prediction</div><div class='prob-row'><span class='prob-label'>"+hn.split(" ")[0]+"</span><div class='prob-track'><div class='prob-fill' style='width:"+pred.h+"%;background:"+(pred.pick==="home"?"var(--blue)":"#5a7a96")+"'></div></div><span class='prob-pct'>"+pred.h+"%</span></div><div class='prob-row'><span class='prob-label'>Draw</span><div class='prob-track'><div class='prob-fill' style='width:"+pred.d+"%;background:"+(pred.pick==="draw"?"var(--blue)":"#5a7a96")+"'></div></div><span class='prob-pct'>"+pred.d+"%</span></div><div class='prob-row'><span class='prob-label'>"+an.split(" ")[0]+"</span><div class='prob-track'><div class='prob-fill' style='width:"+pred.a+"%;background:"+(pred.pick==="away"?"var(--blue)":"#5a7a96")+"'></div></div><span class='prob-pct'>"+pred.a+"%</span></div><span class='verdict' style='background:rgba(0,194,255,.1);color:var(--blue);border:1px solid rgba(0,194,255,.25)'>🎯 AI Pick: "+pickLabel+"</span></div></div>";
+}
+
+var predInterval=null;
 function loadPredictions(){
-  document.getElementById("predictionsContainer").innerHTML="<div class='no-live'><span>⏳</span>Loading…</div>";
   fetch("https://worldcup26.ir/get/games",{headers:{"Accept":"application/json"}})
     .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
     .then(function(data){
@@ -513,6 +580,14 @@ function loadPredictions(){
       renderPredictions(all);
     })
     .catch(function(e){console.warn("Predictions API:",e);renderStaticPredictions();});
+}
+function startPredRefresh(){
+  loadPredictions();
+  if(predInterval)clearInterval(predInterval);
+  predInterval=setInterval(loadPredictions,30000);
+}
+function stopPredRefresh(){
+  if(predInterval){clearInterval(predInterval);predInterval=null;}
 }
 
 function renderStaticPredictions(){
