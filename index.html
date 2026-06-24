@@ -393,17 +393,39 @@ function buildPlayers() {
 function getFlag(name) { return FLAGS[name] || '🏳️'; }
 
 function buildMatchCard(m) {
-  var homeName = typeof m.home_team === 'string' ? m.home_team : (m.home_team && (m.home_team.name || m.home_team.country)) || 'TBD';
-  var awayName = typeof m.away_team === 'string' ? m.away_team : (m.away_team && (m.away_team.name || m.away_team.country)) || 'TBD';
-  var hs = m.home_score != null ? m.home_score : (m.score && m.score.home != null ? m.score.home : '-');
-  var as = m.away_score != null ? m.away_score : (m.score && m.score.away != null ? m.score.away : '-');
-  var st = (m.status || '').toLowerCase();
-  var isLive = st === '1h' || st === '2h' || st === 'live' || st === 'ht' || st === 'in progress' || (m.minute && m.minute > 0);
-  var isFt = st === 'finished' || st === 'ft' || st === 'aet';
-  var statusText = isLive ? (m.minute ? m.minute + "'" : 'LIVE') : isFt ? 'FT' : (m.time || m.kickoff || 'Upcoming');
+  // Handle all known field name variations from worldcup26.ir and similar APIs
+  var home = m.home_team || m.homeTeam || m.home || {};
+  var away = m.away_team || m.awayTeam || m.away || {};
+  var homeName = typeof home === 'string' ? home : (home.name || home.country || home.team_name || home.title || null);
+  var awayName = typeof away === 'string' ? away : (away.name || away.country || away.team_name || away.title || null);
+  // Also try top-level name fields
+  if (!homeName) homeName = m.home_team_name || m.home_name || m.team1 || 'TBD';
+  if (!awayName) awayName = m.away_team_name || m.away_name || m.team2 || 'TBD';
+  // Score — try every common pattern
+  var hs = m.home_score != null ? m.home_score :
+           m.homeScore != null ? m.homeScore :
+           m.score_home != null ? m.score_home :
+           (m.score && m.score.home != null) ? m.score.home :
+           (m.result && m.result.home != null) ? m.result.home :
+           (m.goals && m.goals.home != null) ? m.goals.home : '-';
+  var as = m.away_score != null ? m.away_score :
+           m.awayScore != null ? m.awayScore :
+           m.score_away != null ? m.score_away :
+           (m.score && m.score.away != null) ? m.score.away :
+           (m.result && m.result.away != null) ? m.result.away :
+           (m.goals && m.goals.away != null) ? m.goals.away : '-';
+  // Status
+  var st = (m.status || m.state || m.match_status || '').toLowerCase();
+  var isLive = st.indexOf('1h') > -1 || st.indexOf('2h') > -1 || st === 'live' ||
+               st === 'ht' || st.indexOf('progress') > -1 || st === 'playing' ||
+               (m.minute && parseInt(m.minute) > 0);
+  var isFt = st === 'finished' || st === 'ft' || st === 'aet' || st === 'pen' ||
+             st === 'full-time' || st === 'completed' || st === 'ended';
+  var minute = m.minute || m.elapsed || (m.time_elapsed) || null;
+  var statusText = isLive ? (minute ? minute + "'" : 'LIVE') : isFt ? 'FT' : (m.time || m.kickoff || m.match_time || 'Upcoming');
   var statusCls = isLive ? 'live' : isFt ? 'ft' : 'upcoming';
-  var group = m.group || m.stage || m.round || '';
-  var venue = m.venue || m.stadium || '';
+  var group = m.group || m.group_name || m.stage || m.round || m.matchday || '';
+  var venue = m.venue || m.stadium || m.location || m.city || '';
   return '<div class="match-card '+(isFt?'finished':'')+(isLive?' live-match':'')+'">'+
     '<div class="team-home"><span class="team-flag">'+getFlag(homeName)+'</span><span class="team-name">'+homeName+'</span></div>'+
     '<div class="score-box">'+
@@ -433,9 +455,9 @@ function renderFallback() {
 function renderMatches(matches) {
   var live = [], upcoming = [], finished = [];
   matches.forEach(function(m) {
-    var st = (m.status || '').toLowerCase();
-    if (st === '1h' || st === '2h' || st === 'live' || st === 'ht' || st === 'in progress') live.push(m);
-    else if (st === 'finished' || st === 'ft' || st === 'aet') finished.push(m);
+    var st = (m.status || m.state || m.match_status || '').toLowerCase();
+    if (st.indexOf('1h') > -1 || st.indexOf('2h') > -1 || st === 'live' || st === 'ht' || st.indexOf('progress') > -1 || st === 'playing') live.push(m);
+    else if (st === 'finished' || st === 'ft' || st === 'aet' || st === 'pen' || st === 'full-time' || st === 'completed' || st === 'ended') finished.push(m);
     else upcoming.push(m);
   });
   var html = '';
@@ -454,8 +476,9 @@ function fetchLiveScores() {
       return res.json();
     })
     .then(function(data) {
-      var matches = Array.isArray(data) ? data : (data.games || data.matches || data.data || []);
+      var matches = Array.isArray(data) ? data : (data.games || data.matches || data.data || data.results || []);
       if (!matches.length) throw new Error('Empty');
+      if (matches[0]) console.log('API sample:', JSON.stringify(matches[0]));
       renderMatches(matches);
     })
     .catch(function(e) {
