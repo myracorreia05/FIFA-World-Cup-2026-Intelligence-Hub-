@@ -349,11 +349,11 @@ tr.adv{background:rgba(245,197,24,.03)}
       <h1 class="hero-title">FIFA<br>World Cup<br><em>2026</em></h1>
       <p class="hero-sub">USA · Canada · Mexico &nbsp;|&nbsp; 48 Teams · 104 Matches · One Trophy</p>
       <div class="kpi-strip">
-        <div class="kpi"><span class="kpi-val" data-count="97">0</span><span class="kpi-lbl">Goals</span></div>
-        <div class="kpi"><span class="kpi-val" data-count="26">0</span><span class="kpi-lbl">Matches</span></div>
-        <div class="kpi"><span class="kpi-val">3.7</span><span class="kpi-lbl">Goals/Game</span></div>
-        <div class="kpi"><span class="kpi-val" data-count="13">0</span><span class="kpi-lbl">Days In</span></div>
-        <div class="kpi"><span class="kpi-val" data-count="8">0</span><span class="kpi-lbl">Records Broken</span></div>
+        <div class="kpi"><span class="kpi-val" id="heroGoals">–</span><span class="kpi-lbl">Goals</span></div>
+        <div class="kpi"><span class="kpi-val" id="heroMatches">–</span><span class="kpi-lbl">Matches Played</span></div>
+        <div class="kpi"><span class="kpi-val" id="heroGPG">–</span><span class="kpi-lbl">Goals/Game</span></div>
+        <div class="kpi"><span class="kpi-val" id="heroDays">–</span><span class="kpi-lbl">Days In</span></div>
+        <div class="kpi"><span class="kpi-val" id="heroTeamsLeft">–</span><span class="kpi-lbl">Teams Remaining</span></div>
       </div>
     </div>
     <div class="pitch-svg-wrap">
@@ -380,7 +380,7 @@ tr.adv{background:rgba(245,197,24,.03)}
     </div>
   </div>
 </header>
-<div class="ticker-bar"><span class="ticker-inner">⚡ MESSI 17 WC GOALS — ALL-TIME RECORD &nbsp;·&nbsp; RONALDO SCORES IN 6TH WORLD CUP &nbsp;·&nbsp; MBAPPÉ EQUALS KLOSE (16) &nbsp;·&nbsp; PORTUGAL 5–0 UZBEKISTAN &nbsp;·&nbsp; CANADA 6–0 QATAR &nbsp;·&nbsp; USA PERFECT THROUGH MD2 &nbsp;·&nbsp; NORWAY QUALIFY — 28-YR DROUGHT ENDS &nbsp;·&nbsp; EGYPT WIN IN 92 YEARS &nbsp;·&nbsp; GERMANY 7–1 CURAÇAO &nbsp;·&nbsp; SPAIN GOALLESS VS CAPE VERDE &nbsp;·&nbsp; BELGIUM 0–0 IRAN &nbsp;·&nbsp;</span></div>
+<div class="ticker-bar"><span class="ticker-inner">⚡ ECUADOR SHOCK GERMANY 2–1 · TURKEY BEAT USA 3–2 · MEXICO TOP GROUP A · SWITZERLAND WIN GROUP B · BRAZIL &amp; MOROCCO THROUGH · JAPAN QUALIFY FROM GROUP F · NETHERLANDS TOP GROUP F · GYÖKERES JOINS GOLDEN BOOT RACE (4 GOALS) · MESSI ALL-TIME WC RECORD (17) · RONALDO SCORES IN 6TH WC · 175+ GOALS THROUGH MD3 · MD3 CONCLUDES TODAY — GROUPS G H I &amp; REMAINING GROUPS TONIGHT/SATURDAY &nbsp;·&nbsp;</span></div>
 
 <!-- NAV -->
 <nav class="nav">
@@ -404,9 +404,9 @@ tr.adv{background:rgba(245,197,24,.03)}
 <!-- HUB PAGE -->
 <div id="hub" class="page active">
   <div class="g4" style="margin-bottom:1rem">
-    <div class="card"><div class="card-label">Top Scorers</div><div class="card-val">4</div><div class="card-sub">Messi &amp; Mbappé tied — Golden Boot race</div></div>
-    <div class="card"><div class="card-label">Goals/Match</div><div class="card-val">3.7</div><div class="card-sub">Highest rate since 1954 World Cup</div></div>
-    <div class="card"><div class="card-label">Biggest Win</div><div class="card-val">6–0</div><div class="card-sub">Canada vs Qatar · Jun 18</div></div>
+    <div class="card"><div class="card-label">Top Scorers</div><div class="card-val">4</div><div class="card-sub">Messi, Mbappé &amp; Gyökeres — Golden Boot 3-way race</div></div>
+    <div class="card"><div class="card-label">Goals/Match</div><div class="card-val" id="hubGPG">3.7</div><div class="card-sub">Historic rate — <span id="hubTotalGoals">177</span>+ goals so far</div></div>
+    <div class="card"><div class="card-label">Biggest Win</div><div class="card-val">7–1</div><div class="card-sub">Germany vs Curaçao · Jun 14</div></div>
     <div class="card"><div class="card-label">AI Accuracy</div><div class="card-val" id="hubAcc">–</div><div class="card-sub">Predictions vs actual results</div></div>
   </div>
   <div class="g2" style="margin-bottom:1rem">
@@ -608,16 +608,19 @@ function fl(n){return FLAGS[n]||"🏳️";}
 var TEAMS=["Algeria","Argentina","Australia","Austria","Belgium","Bosnia and Herzegovina","Brazil","Canada","Cape Verde","Colombia","Croatia","Curaçao","Czech Republic","DR Congo","Ecuador","Egypt","England","France","Germany","Ghana","Haiti","Iran","Iraq","Ivory Coast","Japan","Jordan","Mexico","Morocco","Netherlands","New Zealand","Norway","Panama","Paraguay","Portugal","Qatar","Saudi Arabia","Scotland","Senegal","South Africa","South Korea","Spain","Sweden","Switzerland","Tunisia","Turkey","United States","Uruguay","Uzbekistan"];
 
 var GROUPS_DATA=[
-  {name:"A",teams:[{t:"Mexico",p:2,w:2,d:0,l:0,gf:3,ga:0},{t:"South Korea",p:2,w:0,d:1,l:1,gf:1,ga:2},{t:"South Africa",p:2,w:0,d:1,l:1,gf:0,ga:1},{t:"Czech Republic",p:2,w:0,d:0,l:2,gf:1,ga:2}]},
-  {name:"B",teams:[{t:"Canada",p:2,w:1,d:1,l:0,gf:7,ga:1},{t:"Switzerland",p:2,w:1,d:1,l:0,gf:5,ga:2},{t:"Bosnia and Herzegovina",p:2,w:0,d:1,l:1,gf:1,ga:5},{t:"Qatar",p:2,w:0,d:1,l:1,gf:1,ga:6}]},
-  {name:"C",teams:[{t:"Morocco",p:2,w:1,d:1,l:0,gf:2,ga:0},{t:"Brazil",p:2,w:1,d:1,l:0,gf:4,ga:1},{t:"Scotland",p:2,w:1,d:0,l:1,gf:1,ga:1},{t:"Haiti",p:2,w:0,d:0,l:2,gf:0,ga:5}]},
-  {name:"D",teams:[{t:"United States",p:2,w:2,d:0,l:0,gf:6,ga:1},{t:"Australia",p:2,w:1,d:0,l:1,gf:2,ga:2},{t:"Paraguay",p:2,w:1,d:0,l:1,gf:1,ga:2},{t:"Turkey",p:2,w:0,d:0,l:2,gf:0,ga:4}]},
-  {name:"E",teams:[{t:"Germany",p:2,w:2,d:0,l:0,gf:9,ga:2},{t:"Ivory Coast",p:2,w:1,d:0,l:1,gf:2,ga:2},{t:"Ecuador",p:2,w:0,d:1,l:1,gf:0,ga:1},{t:"Curaçao",p:2,w:0,d:1,l:1,gf:1,ga:7}]},
-  {name:"F",teams:[{t:"Netherlands",p:2,w:1,d:1,l:0,gf:7,ga:3},{t:"Japan",p:2,w:1,d:1,l:0,gf:6,ga:2},{t:"Sweden",p:2,w:1,d:0,l:1,gf:6,ga:6},{t:"Tunisia",p:2,w:0,d:0,l:2,gf:1,ga:9}]},
+  // MD3 complete
+  {name:"A",teams:[{t:"Mexico",p:3,w:3,d:0,l:0,gf:6,ga:0},{t:"South Africa",p:3,w:1,d:1,l:1,gf:1,ga:2},{t:"South Korea",p:3,w:0,d:1,l:2,gf:1,ga:3},{t:"Czech Republic",p:3,w:0,d:1,l:2,gf:1,ga:4}]},
+  {name:"B",teams:[{t:"Switzerland",p:3,w:2,d:1,l:0,gf:8,ga:3},{t:"Bosnia and Herzegovina",p:3,w:1,d:1,l:1,gf:4,ga:6},{t:"Canada",p:3,w:1,d:1,l:1,gf:8,ga:4},{t:"Qatar",p:3,w:0,d:1,l:2,gf:2,ga:9}]},
+  {name:"C",teams:[{t:"Brazil",p:3,w:2,d:1,l:0,gf:7,ga:1},{t:"Morocco",p:3,w:2,d:1,l:0,gf:6,ga:2},{t:"Scotland",p:3,w:1,d:0,l:2,gf:1,ga:4},{t:"Haiti",p:3,w:0,d:0,l:3,gf:2,ga:9}]},
+  {name:"D",teams:[{t:"Australia",p:3,w:1,d:1,l:1,gf:2,ga:2},{t:"Turkey",p:3,w:1,d:0,l:2,gf:3,ga:6},{t:"United States",p:3,w:2,d:0,l:1,gf:8,ga:4},{t:"Paraguay",p:3,w:1,d:1,l:1,gf:1,ga:2}]},
+  {name:"E",teams:[{t:"Ivory Coast",p:3,w:2,d:0,l:1,gf:4,ga:3},{t:"Germany",p:3,w:2,d:0,l:1,gf:10,ga:4},{t:"Ecuador",p:3,w:1,d:1,l:1,gf:2,ga:2},{t:"Curaçao",p:3,w:0,d:1,l:2,gf:1,ga:8}]},
+  {name:"F",teams:[{t:"Japan",p:3,w:1,d:2,l:0,gf:7,ga:3},{t:"Netherlands",p:3,w:2,d:1,l:0,gf:10,ga:4},{t:"Sweden",p:3,w:1,d:1,l:1,gf:7,ga:7},{t:"Tunisia",p:3,w:0,d:0,l:3,gf:2,ga:12}]},
+  // MD3 today (June 26) - G,H,I in progress
   {name:"G",teams:[{t:"Egypt",p:2,w:1,d:1,l:0,gf:3,ga:2},{t:"Belgium",p:2,w:0,d:2,l:0,gf:1,ga:1},{t:"Iran",p:2,w:0,d:2,l:0,gf:2,ga:2},{t:"New Zealand",p:2,w:0,d:1,l:1,gf:3,ga:4}]},
   {name:"H",teams:[{t:"Spain",p:2,w:1,d:1,l:0,gf:4,ga:1},{t:"Uruguay",p:2,w:0,d:2,l:0,gf:3,ga:3},{t:"Cape Verde",p:2,w:0,d:2,l:0,gf:2,ga:2},{t:"Saudi Arabia",p:2,w:0,d:1,l:1,gf:1,ga:4}]},
   {name:"I",teams:[{t:"France",p:2,w:2,d:0,l:0,gf:6,ga:1},{t:"Norway",p:2,w:2,d:0,l:0,gf:7,ga:3},{t:"Senegal",p:2,w:0,d:0,l:2,gf:3,ga:6},{t:"Iraq",p:2,w:0,d:0,l:2,gf:1,ga:7}]},
-  {name:"J",teams:[{t:"Argentina",p:2,w:2,d:0,l:0,gf:5,ga:0},{t:"Algeria",p:2,w:1,d:0,l:1,gf:2,ga:4},{t:"Austria",p:2,w:1,d:0,l:1,gf:3,ga:2},{t:"Jordan",p:2,w:0,d:0,l:2,gf:1,ga:5}]},
+  // MD3 Sat June 27 - J,K,L not yet played
+  {name:"J",teams:[{t:"Argentina",p:2,w:2,d:0,l:0,gf:5,ga:0},{t:"Austria",p:2,w:1,d:0,l:1,gf:3,ga:2},{t:"Algeria",p:2,w:1,d:0,l:1,gf:2,ga:4},{t:"Jordan",p:2,w:0,d:0,l:2,gf:1,ga:5}]},
   {name:"K",teams:[{t:"Colombia",p:2,w:2,d:0,l:0,gf:4,ga:1},{t:"Portugal",p:2,w:1,d:1,l:0,gf:6,ga:1},{t:"DR Congo",p:2,w:0,d:1,l:1,gf:1,ga:2},{t:"Uzbekistan",p:2,w:0,d:0,l:2,gf:1,ga:8}]},
   {name:"L",teams:[{t:"England",p:2,w:1,d:1,l:0,gf:4,ga:2},{t:"Croatia",p:2,w:1,d:0,l:1,gf:3,ga:4},{t:"Ghana",p:2,w:1,d:1,l:0,gf:1,ga:0},{t:"Panama",p:2,w:0,d:0,l:2,gf:0,ga:2}]}
 ];
@@ -691,11 +694,11 @@ function buildCharts(){
   Chart.defaults.color="#5a7a96";Chart.defaults.borderColor="#132d47";Chart.defaults.font.family="DM Sans";
   var sc={x:{grid:{color:"#132d47"}},y:{grid:{color:"#132d47"},beginAtZero:true}};
   var base={responsive:true,plugins:{legend:{labels:{color:"#5a7a96",font:{family:"DM Sans",size:11}}}}};
-  new Chart(document.getElementById("goalsChart"),{type:"line",data:{labels:["MD1","MD2"],datasets:[{label:"Goals",data:[48,49],borderColor:"#00c2ff",backgroundColor:"rgba(0,194,255,.1)",tension:.4,fill:true,pointBackgroundColor:"#00c2ff",pointRadius:5}]},options:Object.assign({},base,{scales:sc})});
-  new Chart(document.getElementById("scorersChart"),{type:"bar",data:{labels:["Messi","Mbappé","Haaland","Ronaldo","Gakpo","Selke"],datasets:[{label:"Goals",data:[4,4,3,3,3,3],backgroundColor:["#f5c518","#00c2ff","#34d399","#00c2ff","#a78bfa","#5a7a96"],borderRadius:3}]},options:Object.assign({},base,{indexAxis:"y",scales:sc})});
+  new Chart(document.getElementById("goalsChart"),{type:"line",data:{labels:["MD1","MD2","MD3*"],datasets:[{label:"Goals",data:[48,49,80],borderColor:"#00c2ff",backgroundColor:"rgba(0,194,255,.1)",tension:.4,fill:true,pointBackgroundColor:"#00c2ff",pointRadius:5}]},options:Object.assign({},base,{scales:sc})});
+  window._scorersChart=new Chart(document.getElementById("scorersChart"),{type:"bar",data:{labels:["Messi","Mbappé","Haaland","Undav","David","Brobbey"],datasets:[{label:"Goals",data:[5,4,4,3,3,3],backgroundColor:["#f5c518","#00c2ff","#34d399","#5a7a96","#ff3c3c","#a78bfa"],borderRadius:3}]},options:Object.assign({},base,{indexAxis:"y",scales:sc})});
   new Chart(document.getElementById("hostsChart"),{type:"radar",data:{labels:["Goals For","Clean Sheets","Wins","Points","GD"],datasets:[{label:"USA",data:[6,1,2,6,5],borderColor:"#00c2ff",backgroundColor:"rgba(0,194,255,.1)",pointBackgroundColor:"#00c2ff"},{label:"Mexico",data:[3,2,2,6,3],borderColor:"#f5c518",backgroundColor:"rgba(245,197,24,.1)",pointBackgroundColor:"#f5c518"},{label:"Canada",data:[7,0,1,4,6],borderColor:"#ff3c3c",backgroundColor:"rgba(255,60,60,.1)",pointBackgroundColor:"#ff3c3c"}]},options:Object.assign({},base,{scales:{r:{grid:{color:"#132d47"},angleLines:{color:"#132d47"},pointLabels:{color:"#5a7a96",font:{size:10}},ticks:{display:false}}}})});
   new Chart(document.getElementById("confChart"),{type:"doughnut",data:{labels:["UEFA","CONMEBOL","CONCACAF","CAF","AFC","OFC"],datasets:[{data:[38,22,18,11,6,2],backgroundColor:["#00c2ff","#f5c518","#ff3c3c","#34d399","#a78bfa","#fb923c"],borderColor:"#091e35",borderWidth:2}]},options:Object.assign({},base,{cutout:"62%"})});
-  new Chart(document.getElementById("teamChart"),{type:"bar",data:{labels:["Netherlands","France","Canada","USA","Germany","Norway","Portugal","Mexico","Argentina","Spain"],datasets:[{label:"Goals For",data:[7,7,7,6,6,5,6,3,5,5],backgroundColor:"rgba(0,194,255,.75)",borderRadius:3},{label:"Goals Against",data:[1,1,1,1,1,1,1,0,2,1],backgroundColor:"rgba(255,60,60,.6)",borderRadius:3}]},options:Object.assign({},base,{scales:sc})});
+  new Chart(document.getElementById("teamChart"),{type:"bar",data:{labels:["Netherlands","Germany","Canada","Brazil","Morocco","USA","Mexico","France","Norway","Sweden"],datasets:[{label:"Goals For",data:[10,10,8,7,6,8,6,6,7,7],backgroundColor:"rgba(0,194,255,.75)",borderRadius:3},{label:"Goals Against",data:[4,4,4,1,2,4,0,1,3,7],backgroundColor:"rgba(255,60,60,.6)",borderRadius:3}]},options:Object.assign({},base,{scales:sc})});
 }
 
 /* ── STANDINGS ── */
@@ -710,7 +713,7 @@ function buildGroups(){
 
 /* ── PLAYERS ── */
 function buildPlayers(){
-  var PL=[{e:"🇦🇷",n:"Lionel Messi",c:"Argentina",p:"Forward",g:4,a:1,r:9.4,note:"All-time WC scorer (17 total). First WC hat-trick."},{e:"🇫🇷",n:"Kylian Mbappé",c:"France",p:"Forward",g:4,a:0,r:9.2,note:"France all-time top scorer (60). 16 WC goals."},{e:"🇵🇹",n:"Cristiano Ronaldo",c:"Portugal",p:"Forward",g:3,a:0,r:8.1,note:"Scored in 6th World Cup. Age 41. Historic."},{e:"🇳🇴",n:"Erling Haaland",c:"Norway",p:"Forward",g:3,a:1,r:8.8,note:"Fired Norway to knockouts. 28-yr drought ends."},{e:"🇩🇪",n:"Davie Selke",c:"Germany",p:"Forward",g:3,a:0,r:8.0,note:"Surprise star for Germany in dominant opening."},{e:"🇳🇱",n:"Cody Gakpo",c:"Netherlands",p:"Forward",g:3,a:1,r:8.5,note:"Netherlands top scorer in strong campaign."},{e:"🇺🇸",n:"Christian Pulisic",c:"United States",p:"Midfielder",g:2,a:2,r:8.6,note:"USA perfect through 2 games on home soil."},{e:"🇪🇬",n:"Mohamed Salah",c:"Egypt",p:"Forward",g:2,a:1,r:8.3,note:"Led Egypt to first WC win in 92 years."}];
+  var PL=[{e:"🇦🇷",n:"Lionel Messi",c:"Argentina",p:"Forward",g:4,a:1,r:9.4,note:"All-time WC scorer (17 total). First WC hat-trick."},{e:"🇫🇷",n:"Kylian Mbappé",c:"France",p:"Forward",g:4,a:1,r:9.2,note:"France all-time top scorer. 16 WC goals — equals Klose record."},{e:"🇵🇹",n:"Cristiano Ronaldo",c:"Portugal",p:"Forward",g:3,a:0,r:8.1,note:"Scored in 6th World Cup. Age 41. Historic."},{e:"🇳🇴",n:"Erling Haaland",c:"Norway",p:"Forward",g:4,a:1,r:9.0,note:"4 goals in 2 games. Faces Mbappé today in Group I decider."},{e:"🇩🇪",n:"Davie Selke",c:"Germany",p:"Forward",g:3,a:0,r:8.0,note:"Surprise star for Germany in dominant opening."},{e:"🇳🇱",n:"Cody Gakpo",c:"Netherlands",p:"Forward",g:3,a:1,r:8.5,note:"Netherlands top scorer in strong campaign."},{e:"🇺🇸",n:"Christian Pulisic",c:"United States",p:"Midfielder",g:2,a:2,r:8.6,note:"USA perfect through 2 games on home soil."},{e:"🇪🇬",n:"Mohamed Salah",c:"Egypt",p:"Forward",g:2,a:1,r:8.3,note:"Led Egypt to first WC win in 92 years."}];
   var c=document.getElementById("playerGrid");
   PL.forEach(function(p){var bw=Math.round(p.g/4*100);c.insertAdjacentHTML("beforeend","<div class='pc'><div class='pav'>"+p.e+"</div><div style='flex:1'><div class='pname'>"+p.n+"</div><div class='pnat'>"+p.c+" · "+p.p+"</div><div class='pstats'><div class='ps'><span class='psv'>"+p.g+"</span><span class='psl'>Goals</span></div><div class='ps'><span class='psv'>"+p.a+"</span><span class='psl'>Assists</span></div><div class='ps'><span class='psv'>"+p.r+"</span><span class='psl'>Rating</span></div></div><div class='bar-track'><div class='bar-fill' style='width:0%' data-w='"+bw+"%'></div></div><div style='font-size:.6rem;color:var(--muted);margin-top:.3rem'>"+p.note+"</div></div></div>");});
 }
@@ -738,6 +741,7 @@ function renderLive(all){
   if(fin.length){html+="<div class='day-label'>✅ Recent Results</div>";fin.slice(0,14).forEach(function(m){html+=buildMCard(m);});}
   document.getElementById("liveContainer").innerHTML=html||"<div class='empty'><span>📅</span>No matches</div>";
   document.getElementById("liveUpd").textContent="Updated: "+new Date().toLocaleTimeString();
+  updateHeroStats(all);
 }
 function fetchLive(){
   apiFetch(renderLive,function(){
@@ -798,16 +802,94 @@ function startPredRefresh(){loadPreds();if(predInt)clearInterval(predInt);predIn
 function stopPredRefresh(){if(predInt){clearInterval(predInt);predInt=null;}}
 
 /* ── GOLDEN BOOT ── */
-var SCORERS=[{n:"Lionel Messi",c:"Argentina",e:"🇦🇷",g:4,a:1,col:"#f5c518"},{n:"Kylian Mbappé",c:"France",e:"🇫🇷",g:4,a:0,col:"#00c2ff"},{n:"Erling Haaland",c:"Norway",e:"🇳🇴",g:3,a:1,col:"#34d399"},{n:"Cristiano Ronaldo",c:"Portugal",e:"🇵🇹",g:3,a:0,col:"#00c2ff"},{n:"Cody Gakpo",c:"Netherlands",e:"🇳🇱",g:3,a:1,col:"#a78bfa"},{n:"Davie Selke",c:"Germany",e:"🇩🇪",g:3,a:0,col:"#5a7a96"},{n:"Brian Brobbey",c:"Netherlands",e:"🇳🇱",g:2,a:0,col:"#5a7a96"},{n:"Mohamed Salah",c:"Egypt",e:"🇪🇬",g:2,a:1,col:"#fb923c"},{n:"Christian Pulisic",c:"USA",e:"🇺🇸",g:2,a:2,col:"#00c2ff"},{n:"Jonathan David",c:"Canada",e:"🇨🇦",g:2,a:0,col:"#ff3c3c"}];
-function buildGoldenBoot(){
-  var wrap=document.getElementById("raceWrap");wrap.innerHTML="";
-  var max=SCORERS[0].g;
-  SCORERS.forEach(function(s,i){
+var SCORERS=[
+  {n:"Lionel Messi",c:"Argentina",e:"🇦🇷",g:5,a:1,col:"#f5c518"},
+  {n:"Kylian Mbappé",c:"France",e:"🇫🇷",g:4,a:1,col:"#00c2ff"},
+  {n:"Erling Haaland",c:"Norway",e:"🇳🇴",g:4,a:1,col:"#34d399"},
+  {n:"Deniz Undav",c:"Germany",e:"🇩🇪",g:3,a:2,col:"#5a7a96"},
+  {n:"Jonathan David",c:"Canada",e:"🇨🇦",g:3,a:0,col:"#ff3c3c"},
+  {n:"Cristiano Ronaldo",c:"Portugal",e:"🇵🇹",g:3,a:0,col:"#00c2ff"},
+  {n:"Brian Brobbey",c:"Netherlands",e:"🇳🇱",g:3,a:0,col:"#a78bfa"},
+  {n:"Ismael Saibari",c:"Morocco",e:"🇲🇦",g:3,a:0,col:"#34d399"},
+  {n:"Matheus Cunha",c:"Brazil",e:"🇧🇷",g:3,a:0,col:"#f5c518"},
+  {n:"Harry Kane",c:"England",e:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",g:2,a:0,col:"#5a7a96"},
+  {n:"Vinícius Jr.",c:"Brazil",e:"🇧🇷",g:2,a:2,col:"#f5c518"},
+  {n:"Folarin Balogun",c:"USA",e:"🇺🇸",g:2,a:0,col:"#00c2ff"},
+];
+function renderGoldenBoot(scorers){
+  var wrap=document.getElementById("raceWrap");
+  if(!wrap)return;
+  wrap.innerHTML="";
+  var max=scorers[0].g;
+  scorers.forEach(function(s,i){
     var pct=Math.round(s.g/max*100);
     var row=document.createElement("div");row.className="race-row";
-    row.innerHTML="<div class='race-rank "+(i<3?"top3":"")+"'>"+(i+1)+"</div><div class='race-flag'>"+s.e+"</div><div class='race-name'>"+s.n.split(" ").slice(-1)[0]+"</div><div class='race-bar-wrap'><div class='race-bar' id='rbar"+i+"' style='width:0%;background:"+s.col+"'><span class='race-goals'>"+s.g+"</span></div></div><div class='race-assists'>"+s.a+" ast</div>";
+    row.innerHTML="<div class='race-rank "+(i<3?"top3":"")+"'>"+(i+1)+"</div><div class='race-flag'>"+s.e+"</div><div class='race-name' style='font-size:.82rem'>"+s.n+"</div><div class='race-bar-wrap'><div class='race-bar' id='rbar"+i+"' style='width:0%;background:"+s.col+"'><span class='race-goals'>"+s.g+"</span></div></div><div class='race-assists'>"+s.a+" ast</div>";
     wrap.appendChild(row);
-    setTimeout(function(){document.getElementById("rbar"+i).style.width=pct+"%";},100+i*80);
+    setTimeout(function(){var el=document.getElementById("rbar"+i);if(el)el.style.width=pct+"%";},80+i*60);
+  });
+}
+
+function buildGoldenBoot(){
+  var wrap=document.getElementById("raceWrap");
+  if(!wrap)return;
+  wrap.innerHTML="<div class='empty'><span>⏳</span>Loading live scorer data…</div>";
+  apiFetch(function(all){
+    // Build scorer map from API data
+    var scorerMap={};
+    all.filter(function(m){return isFin(m)&&m.type==="group";}).forEach(function(m){
+      var hn=m.home_team_name_en||"";var an=m.away_team_name_en||"";
+      function addScorers(raw,team){
+        if(!raw||raw==="null")return;
+        try{
+          var s=raw.replace(/^\{/,"[").replace(/\}$/,"]");
+          JSON.parse(s).forEach(function(entry){
+            var name=String(entry).replace(/"/g,"").replace(/\s+\d+.*$/,"").trim();
+            if(!name||name.length<2)return;
+            if(!scorerMap[name])scorerMap[name]={n:name,c:team,g:0,a:0};
+            scorerMap[name].g++;
+          });
+        }catch(e){}
+      }
+      addScorers(m.home_scorers,hn);
+      addScorers(m.away_scorers,an);
+    });
+    // Merge with known data for flags/colours
+    var known={
+      "Lionel Messi":{e:"🇦🇷",col:"#f5c518",a:1},
+      "Kylian Mbappé":{e:"🇫🇷",col:"#00c2ff",a:1},
+      "K. Mbappé":{e:"🇫🇷",col:"#00c2ff",a:1},
+      "Erling Haaland":{e:"🇳🇴",col:"#34d399",a:1},
+      "Deniz Undav":{e:"🇩🇪",col:"#5a7a96",a:2},
+      "Dniz Avndav":{e:"🇩🇪",col:"#5a7a96",a:2},
+      "Jonathan David":{e:"🇨🇦",col:"#ff3c3c",a:0},
+      "Cristiano Ronaldo":{e:"🇵🇹",col:"#00c2ff",a:0},
+      "Brian Brobbey":{e:"🇳🇱",col:"#a78bfa",a:0},
+      "Ismael Saibari":{e:"🇲🇦",col:"#34d399",a:1},
+      "Asmaail Saibari":{e:"🇲🇦",col:"#34d399",a:1},
+      "Matheus Cunha":{e:"🇧🇷",col:"#f5c518",a:0},
+      "Harry Kane":{e:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",col:"#5a7a96",a:0},
+      "H. Kane":{e:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",col:"#5a7a96",a:0},
+      "Vinícius Júnior":{e:"🇧🇷",col:"#f5c518",a:2},
+      "Folarin Balogun":{e:"🇺🇸",col:"#00c2ff",a:0},
+      "F. Balogun":{e:"🇺🇸",col:"#00c2ff",a:0},
+    };
+    var merged=Object.keys(scorerMap).map(function(k){
+      var s=scorerMap[k];var kn=known[k]||{};
+      return {n:k,c:s.c,g:s.g,a:kn.a||0,e:kn.e||"🏳️",col:kn.col||"#5a7a96"};
+    }).sort(function(a,b){return b.g-a.g||b.a-a.a;}).slice(0,12);
+    // If API data too sparse, fall back to SCORERS
+    if(!merged.length||merged[0].g<1){merged=SCORERS;}
+    renderGoldenBoot(merged);
+    // Update chart
+    var top6=merged.slice(0,6);
+    if(window._scorersChart){
+      window._scorersChart.data.labels=top6.map(function(s){return s.n.split(" ").slice(-1)[0];});
+      window._scorersChart.data.datasets[0].data=top6.map(function(s){return s.g;});
+      window._scorersChart.update();
+    }
+  },function(){
+    renderGoldenBoot(SCORERS);
   });
 }
 
@@ -1093,12 +1175,89 @@ function runSim(){
   document.getElementById("simResult").classList.add("show");
 }
 
-/* ── COUNTERS ── */
-function animateCounters(){
-  document.querySelectorAll("[data-count]").forEach(function(el){
-    var target=parseInt(el.dataset.count),start=null;
-    function step(ts){if(!start)start=ts;var p=Math.min((ts-start)/1500,1);el.textContent=Math.floor(p*target);if(p<1)requestAnimationFrame(step);else el.textContent=target;}
-    requestAnimationFrame(step);
+/* ── LIVE HERO STATS ── */
+function animateVal(el, target, duration) {
+  var start = null;
+  var from = parseFloat(el.textContent) || 0;
+  function step(ts) {
+    if (!start) start = ts;
+    var p = Math.min((ts - start) / duration, 1);
+    var val = from + (target - from) * p;
+    el.textContent = Number.isInteger(target) ? Math.floor(val) : val.toFixed(1);
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = Number.isInteger(target) ? target : target.toFixed(1);
+  }
+  requestAnimationFrame(step);
+}
+
+function updateHeroStats(allMatches) {
+  // Count ALL finished matches including knockouts
+  var finished = allMatches.filter(function(m) {
+    return isFin(m) && m.home_team_id !== "0" && m.away_team_id !== "0";
+  });
+
+  // Sum goals from ALL finished matches
+  var totalGoals = 0;
+  var totalMatches = finished.length;
+  finished.forEach(function(m) {
+    var hs = parseInt(m.home_score);
+    var as = parseInt(m.away_score);
+    if (!isNaN(hs) && m.home_score !== "null") totalGoals += hs;
+    if (!isNaN(as) && m.away_score !== "null") totalGoals += as;
+  });
+
+  var gpg = totalMatches > 0 ? Math.round((totalGoals / totalMatches) * 10) / 10 : 0;
+
+  // Days since June 11
+  var days = Math.floor((new Date() - new Date("2026-06-11")) / (1000*60*60*24)) + 1;
+
+  // Teams remaining — 48 minus those eliminated (0 pts after 3 group games)
+  var eliminated = 0;
+  var groupTeamStats = {};
+  allMatches.filter(function(m){return m.type==="group"&&isFin(m)&&m.home_team_id!=="0";}).forEach(function(m){
+    [m.home_team_name_en, m.away_team_name_en].forEach(function(t){
+      if(!t)return;
+      if(!groupTeamStats[t])groupTeamStats[t]={p:0,pts:0};
+      groupTeamStats[t].p++;
+    });
+    var outcome = getOutcome(m.home_score, m.away_score);
+    var hn=m.home_team_name_en, an=m.away_team_name_en;
+    if(hn&&an){
+      if(outcome==="home"){groupTeamStats[hn].pts+=3;}
+      else if(outcome==="away"){groupTeamStats[an].pts+=3;}
+      else{groupTeamStats[hn].pts+=1;groupTeamStats[an].pts+=1;}
+    }
+  });
+  Object.keys(groupTeamStats).forEach(function(t){
+    if(groupTeamStats[t].p>=3&&groupTeamStats[t].pts===0)eliminated++;
+  });
+  var teamsLeft = Math.max(48 - eliminated, 32);
+
+  // Animate all values
+  animateVal(document.getElementById("heroGoals"), totalGoals, 1200);
+  animateVal(document.getElementById("heroMatches"), totalMatches, 1200);
+  animateVal(document.getElementById("heroGPG"), gpg, 1200);
+  animateVal(document.getElementById("heroDays"), days, 1000);
+  document.getElementById("heroTeamsLeft").textContent = teamsLeft;
+
+  // Update hub card live values
+  var hubGPGel = document.getElementById("hubGPG");
+  var hubTotalEl = document.getElementById("hubTotalGoals");
+  if(hubGPGel) hubGPGel.textContent = gpg.toFixed(1);
+  if(hubTotalEl) hubTotalEl.textContent = totalGoals;
+}
+
+function animateCounters() {
+  // Fetch live data to populate hero stats
+  apiFetch(function(all) {
+    updateHeroStats(all);
+  }, function() {
+    // Fallback to known values if API fails
+    animateVal(document.getElementById("heroGoals"), 177, 1200);
+    animateVal(document.getElementById("heroMatches"), 48, 1200);
+    animateVal(document.getElementById("heroGPG"), 3.7, 1200);
+    animateVal(document.getElementById("heroDays"), Math.floor((new Date()-new Date("2026-06-11"))/(1000*60*60*24))+1, 1000);
+    document.getElementById("heroTeamsLeft").textContent = "48";
   });
 }
 
